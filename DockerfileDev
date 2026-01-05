@@ -1,0 +1,38 @@
+FROM php:8.5-apache
+
+# Apache config
+COPY dev/docker/vhost.conf /etc/apache2/sites-available/000-default.conf
+
+WORKDIR /srv/app
+
+# System deps + PHP extensions
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    curl \
+    wait-for-it  \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    gd \
+    zip \
+    bcmath \
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
+
+# Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# User mapping
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN usermod -u $USER_ID www-data && groupmod -g $GROUP_ID www-data
+
+RUN chown -R www-data:www-data /srv/app
+
+CMD ["apache2-foreground"]

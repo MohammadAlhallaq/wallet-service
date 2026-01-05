@@ -1,0 +1,17 @@
+# Stemless docker compose
+version: '3.1'
+
+services:
+  app:
+    build: 
+      dockerfile: ./DockerfileDev
+      context: .
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/srv/app
+    entrypoint: ./dev/docker/entrypoint.app.sh
+    restart: always
