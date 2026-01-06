@@ -203,12 +203,12 @@ Wallet A ballance:
 ### Idempotency Key Handling
 A potential improvement for handling Idempotency Keys is to **cache them on the backend** along with the response (e.g., in Redis).  
 When a request with the same key is received again, the cached response can be returned directly.  
-This **avoids unnecessary database writes** and **improves performance**, especially for high-throughput endpoints like wallet transactions.
+This **avoids unnecessary database reads** and **improves performance**, especially for high-throughput endpoints like wallet transactions.
 
 ---
 
 ### Ensuring Atomicity with Cache Locks
-Our current database operations (e.g., using transactions with `lockForUpdate`) are already **atomic**.  
+Our current database operations (e.g., using `transactions` with `lockForUpdate`) are already **atomic**.  
 However, another approach is to leverage **Laravel’s cache lock mechanisms**, which can be especially useful when **multiple services or app instances share the same cache**.
 
 - The cache lock ensures that **only one process can modify a resource at a time**, preventing race conditions without hitting the database unnecessarily.  
@@ -234,7 +234,7 @@ Cache::lock("wallet:$walletId", 10)->block(5, function () use ($walletId) {
 ---
 
 > **Note:**  
-> In the examples above, we did not use caching solutions for idempotency or locking.  
+> In the current implementation of the service, we do not use caching mechanisms for idempotency or locking.  
 > The reason is to **avoid adding another layer of complexity** at this stage.  
 > Introducing caching would require dealing with additional challenges such as **cache invalidation**, **distributed consistency**.  
 > For now, database transactions with `lockForUpdate` inside `transactions` and idempotency handled at the application level are sufficient.
