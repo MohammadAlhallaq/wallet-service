@@ -25,7 +25,7 @@ cd <project-directory>
 
 * PHP 8.5
 * Composer
-* MySQL or compatible database
+* SQLite (will be used by defult in our example)
 
 ### Run with Docker
 
@@ -34,6 +34,7 @@ cd <project-directory>
 ```bash
 docker-compose up --build
 ```
+> **Note:** Building Docker image create and migrate the SQLite database automatically for this example.
 
 2. Access the app at: [http://localhost:8000](http://localhost:8000)
 3. Docker will automatically run migrations and set up the environment.
@@ -64,6 +65,7 @@ php artisan key:generate
 ```bash
 php artisan migrate
 ```
+> **Note:** Running migrations manually with `php artisan migrate` will create and migrate the SQLite database file for this example.
 
 5. Start the Laravel development server:
 
