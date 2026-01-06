@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Wallet extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'owner_name',
         'currency',
@@ -25,11 +28,30 @@ class Wallet extends Model
         return $this->hasMany(Transaction::class);
     }
 
-    protected function balanceFormatted(): Attribute
+    public function deposit(float $amount): self
     {
-        return Attribute::make(
-            get: fn($value, array $attributes) => (int) $attributes['balance'] / 100,
-            set: fn($value) => (int) $value * 100,
-        );
+        $this->increment('balance', $this->toMinorUnits($amount));
+
+        return $this;
+    }
+
+    public function withdraw(float $amount): self
+    {
+        $amountInCents = $this->toMinorUnits($amount);
+
+        $this->decrement('balance', $amountInCents);
+
+        return $this;
+    }
+
+
+    protected function toMinorUnits(float $amount): int
+    {
+        return (int) round($amount * 100);
+    }
+
+    public function getBalanceAttribute($value): float
+    {
+        return $value / 100;
     }
 }

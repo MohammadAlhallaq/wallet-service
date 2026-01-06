@@ -21,7 +21,7 @@ class WalletService
 
             if ($existing) return $existing;
 
-            $wallet->increment('balance', $amount);
+            $wallet->increment('balance', $this->toCents($amount));
 
             return Transaction::create([
                 'wallet_id' => $wallet->id,
@@ -46,7 +46,7 @@ class WalletService
                 throw new LogicException('Insufficient funds');
             }
 
-            $wallet->decrement('balance', $amount);
+            $wallet->withdraw($amount);
 
             return Transaction::create([
                 'wallet_id' => $wallet->id,
@@ -76,25 +76,33 @@ class WalletService
                 throw new LogicException('Insufficient funds');
             }
 
-            $from->decrement('balance', $amount);
-            $to->increment('balance', $amount);
+            $from->deposit($amount);
+            $to->withdraw($amount);
 
-            Transaction::insert([
-                [
-                    'wallet_id' => $from->id,
-                    'type' => TransactionType::TransferDebit->value,
-                    'amount' => $amount,
-                    'related_wallet_id' => $to->id,
-                    'idempotency_key' => $key,
-                ],
-                [
-                    'wallet_id' => $to->id,
-                    'type' => TransactionType::TransferCredit->value,
-                    'amount' => $amount,
-                    'related_wallet_id' => $from->id,
-                    'idempotency_key' => $key,
-                ],
+            $debit = new Transaction([
+                'wallet_id' => $from->id,
+                'type' => TransactionType::TransferDebit,
+                'amount' => $amount,
+                'related_wallet_id' => $to->id,
+                'idempotency_key' => $key,
             ]);
+
+            $credit = new Transaction([
+                'wallet_id' => $to->id,
+                'type' => TransactionType::TransferCredit,
+                'amount' => $amount,
+                'related_wallet_id' => $from->id,
+                'idempotency_key' => $key,
+            ]);
+
+            $debit->save();
+            $credit->save();
         });
+    }
+
+
+    protected function toCents(float $amount): int
+    {
+        return (int) round($amount * 100);
     }
 }

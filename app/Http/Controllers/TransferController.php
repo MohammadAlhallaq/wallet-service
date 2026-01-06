@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TransactionResource;
 use App\Models\Wallet;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
@@ -18,11 +19,15 @@ class TransferController extends Controller
             'amount' => 'required|integer|min:1',
         ]);
 
-        return $this->service->transfer(
+        $this->service->transfer(
             Wallet::findOrFail($data['from_wallet_id']),
             Wallet::findOrFail($data['to_wallet_id']),
             $data['amount'],
             $request->header('Idempotency-Key')
         );
+
+        return response()->json([
+            "message" => 'transfer has been completed successfully'
+        ]);
     }
 }

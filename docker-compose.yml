@@ -1,6 +1,3 @@
-# Stemless docker compose
-version: '3.1'
-
 services:
   app:
     build: 
