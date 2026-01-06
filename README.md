@@ -236,8 +236,3 @@ Cache::lock("wallet:$walletId", 10)->block(5, function () use ($walletId) {
 > **Note:**  
 > In the current implementation of the service, we didn't use caching mechanisms for idempotency or locking to **avoid adding another layer of complexity** at this stage, as introducing caching would require dealing with additional challenges such as **cache invalidation**, **distributed consistency**.  
 > For now, database transactions with `lockForUpdate` inside `transactions` and idempotency handled at the application level are sufficient.
-
-
-## License
-
-MIT License
