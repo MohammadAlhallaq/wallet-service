@@ -94,7 +94,7 @@ Make sure your testing database is configured in `.env.testing` or in `phpunit.x
 
 ---
 
-## API Endpoints
+## Example API Endpoints
 
 ### Health
 
