@@ -104,7 +104,7 @@ curl -X POST http://localhost:8000/wallets/{wallet}/deposit \
      -H "Content-Type: application/json" \
      -H "Accept: application/json" \
      -H "Idempotency-Key: YOUR_UNIQUE_KEY_HERE" \
-     -d '{"amount": 10}'
+     -d '{"amount": 100}'
 ```
 
 Response:
