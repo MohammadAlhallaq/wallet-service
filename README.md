@@ -38,11 +38,6 @@ docker-compose up --build
 2. Access the app at: [http://localhost:8000](http://localhost:8000)
 3. Docker will automatically run migrations and set up the environment.
 
-#### Custom User IDs (Docker only)
-
-```bash
-UID=1000 GID=1000 docker-compose up --build
-```
 
 ### Run Locally without Docker
 
@@ -105,17 +100,19 @@ GET /wallets/{wallet}/transactions
 Example: Create a wallet
 
 ```bash
-curl -X POST http://localhost:8000/wallets -H 'Content-Type: application/json' -d '{"name":"My Wallet"}'
+curl -X POST http://localhost:8000/wallets -H 'Content-Type: application/json' -d '{"ownder_name":"My Wallet", "currency":"USD"}'
 ```
 
 Response:
 
 ```json
 {
-  "id": 1,
-  "name": "My Wallet",
-  "balance": 0,
-  "created_at": "2026-01-06T00:00:00Z"
+    "data": {
+        "id": 1,
+        "owner_name": "mohammad",
+        "balance": 0,
+        "created_at": "2026-01-06 16:38:44"
+    }
 }
 ```
 
@@ -137,11 +134,13 @@ Response:
 
 ```json
 {
-  "transaction_id": 1,
-  "wallet_id": 1,
-  "amount": 100,
-  "type": "deposit",
-  "balance": 100
+    "data": {
+        "from_wallet": 1,
+        "to_wallet": 1,
+        "type": "deposit",
+        "amount": 100,
+        "created_at": "2026-01-06T16:39:23.000000Z"
+    }
 }
 ```
 
