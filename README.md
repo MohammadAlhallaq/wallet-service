@@ -177,11 +177,11 @@ Wallet A ballance:
 
 ## Notes
 
-* Idempotency ensures repeated requests with the same key won't double-execute transactions.
-* Be careful with force pushes to the repository to avoid losing history.
-* Always test endpoints using a tool like Postman or curl.
-* Docker includes PHP, Composer, and required extensions, so local installation is only needed if not using Docker.
-* When running locally without Docker, remember to run `composer install`, `php artisan key:generate`, and `php artisan migrate` before testing the app.
+### Idempotency Key Handling
+A potential improvement for handling Idempotency Keys is to **cache them on the backend** along with the response (e.g., in Redis).  
+When a request with the same key is received again, the cached response can be returned directly.  
+This **avoids unnecessary database writes** and **improves performance**, especially for high-throughput endpoints like wallet transactions.
+
 
 ## License
 
