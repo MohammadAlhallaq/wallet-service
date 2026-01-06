@@ -12,6 +12,15 @@ A simple Laravel-based wallet service API with basic wallet management, transact
 
 ## Setup Instructions
 
+### Clone the Repository
+
+1. Clone the repository and navigate to the project directory:
+
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
+
 ### Requirements (only if testing locally without Docker)
 
 * PHP 8.5
@@ -32,43 +41,42 @@ docker-compose up --build
 #### Custom User IDs (Docker only)
 
 ```bash
-docker-compose up --build
+UID=1000 GID=1000 docker-compose up --build
 ```
 
 ### Run Locally without Docker
 
-1. Clone the repository and navigate to the project directory.
-2. Install dependencies:
+1. Install dependencies:
 
 ```bash
 composer install
 ```
 
-3. Create a copy of `.env.example` as `.env` and configure your database connection.
+2. Create a copy of `.env.example` as `.env` and configure your database connection.
 
 ```bash
 cp .env.example .env
 ```
 
-4. Generate Laravel application key:
+3. Generate Laravel application key:
 
 ```bash
 php artisan key:generate
 ```
 
-5. Run database migrations:
+4. Run database migrations:
 
 ```bash
 php artisan migrate
 ```
 
-6. Start the Laravel development server:
+5. Start the Laravel development server:
 
 ```bash
 php artisan serve
 ```
 
-7. Access the app at: [http://localhost:8000](http://localhost:8000)
+6. Access the app at: [http://localhost:8000](http://localhost:8000)
 
 ## API Endpoints
 
