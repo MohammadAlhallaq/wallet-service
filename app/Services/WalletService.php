@@ -14,6 +14,7 @@ class WalletService
     public function deposit(Wallet $wallet, int $amount, string $key): Transaction
     {
         return DB::transaction(function () use ($wallet, $amount, $key) {
+            $wallet->lockForUpdate();
 
             $existing = Transaction::where('wallet_id', $wallet->id)
                 ->where('idempotency_key', $key)
@@ -35,6 +36,7 @@ class WalletService
     public function withdraw(Wallet $wallet, int $amount, string $key): Transaction
     {
         return DB::transaction(function () use ($wallet, $amount, $key) {
+            $wallet->lockForUpdate();
 
             $existing = Transaction::where('wallet_id', $wallet->id)
                 ->where('idempotency_key', $key)
@@ -57,46 +59,50 @@ class WalletService
         });
     }
 
-    public function transfer(Wallet $from, Wallet $to, int $amount, string $key)
+    public function transfer(Wallet $fromWallet, Wallet $toWallet, int $amount, string $key)
     {
-        return DB::transaction(function () use ($from, $to, $amount, $key) {
-            // Idempotency: check global
+        return DB::transaction(function () use ($fromWallet, $toWallet, $amount, $key) {
+
+            $fromWallet->lockforupdate();
+            $toWallet->lockforupdate();
+
             $existing = Transaction::where('idempotency_key', $key)->first();
             if ($existing) return $existing;
 
-            if ($from->id === $to->id) {
+            if ($fromWallet->id === $toWallet->id) {
                 throw new LogicException('Cannot transfer to the same wallet');
             }
 
-            if ($from->currency !== $to->currency) {
+            if ($fromWallet->currency !== $toWallet->currency) {
                 throw new LogicException('Currency mismatch');
             }
 
-            if ($from->balance < $amount) {
+            if ($fromWallet->balance < $amount) {
                 throw new LogicException('Insufficient funds');
             }
 
-            $from->deposit($amount);
-            $to->withdraw($amount);
+            $fromWallet->withdraw($amount);
+            $toWallet->deposit($amount);
 
             $debit = new Transaction([
-                'wallet_id' => $from->id,
+                'wallet_id' => $fromWallet->id,
                 'type' => TransactionType::TransferDebit,
                 'amount' => $amount,
-                'related_wallet_id' => $to->id,
+                'related_wallet_id' => $toWallet->id,
                 'idempotency_key' => $key,
             ]);
 
             $credit = new Transaction([
-                'wallet_id' => $to->id,
+                'wallet_id' => $toWallet->id,
                 'type' => TransactionType::TransferCredit,
                 'amount' => $amount,
-                'related_wallet_id' => $from->id,
+                'related_wallet_id' => $fromWallet->id,
                 'idempotency_key' => $key,
             ]);
 
             $debit->save();
             $credit->save();
+            return;
         });
     }
 

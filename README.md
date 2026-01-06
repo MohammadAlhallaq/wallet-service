@@ -97,10 +97,14 @@ GET /wallets/{wallet}/balance
 GET /wallets/{wallet}/transactions
 ```
 
-Example: Create a wallet
+Example: Deposit 100 into Wallet A
 
 ```bash
-curl -X POST http://localhost:8000/wallets -H 'Content-Type: application/json' -d '{"ownder_name":"My Wallet", "currency":"USD"}'
+curl -X POST http://localhost:8000/wallets/{wallet}/deposit \
+     -H "Content-Type: application/json" \
+     -H "Accept: application/json" \
+     -H "Idempotency-Key: YOUR_UNIQUE_KEY_HERE" \
+     -d '{"amount": 10}'
 ```
 
 Response:
@@ -108,10 +112,21 @@ Response:
 ```json
 {
     "data": {
-        "id": 1,
+        "type": "deposit",
+        "amount": 100,
+        "created_at": "2026-01-06 19:38:39"
+    }
+}
+```
+Wallet A ballance:
+```json
+{
+    "data": {
+        "id": 3,
         "owner_name": "mohammad",
-        "balance": 0,
-        "created_at": "2026-01-06 16:38:44"
+        "balance": 100,
+        "currency": "USD",
+        "created_at": "2026-01-06 19:24:24"
     }
 }
 ```
@@ -124,22 +139,36 @@ POST /wallets/{wallet}/withdraw
 POST /transfers
 ```
 
-Example: Deposit funds
+Example: Withdraw 30 from Wallet A
 
 ```bash
-curl -X POST http://localhost:8000/wallets/1/deposit -H 'Idempotency-Key: abc123' -H 'Content-Type: application/json' -d '{"amount":100}'
+curl -X POST http://localhost:8000/wallets/{wallet}/withdraw \
+     -H "Content-Type: application/json" \
+     -H "Accept: application/json" \
+     -H "Idempotency-Key: YOUR_UNIQUE_KEY_HERE" \
+     -d '{"amount": 30}'
 ```
 
 Response:
-
 ```json
 {
     "data": {
-        "from_wallet": 1,
-        "to_wallet": 1,
-        "type": "deposit",
-        "amount": 100,
-        "created_at": "2026-01-06T16:39:23.000000Z"
+        "type": "withdrawal",
+        "amount": 30,
+        "created_at": "2026-01-06 19:49:59"
+    }
+}
+```
+
+Wallet A ballance:
+```json
+{
+    "data": {
+        "id": 3,
+        "owner_name": "mohammad",
+        "balance": 70,
+        "currency": "USD",
+        "created_at": "2026-01-06 19:24:24"
     }
 }
 ```

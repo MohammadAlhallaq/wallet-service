@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Resources\TransactionResource;
 use App\Models\Wallet;
 use App\Services\WalletService;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class TransferController extends Controller
 {
@@ -19,15 +21,24 @@ class TransferController extends Controller
             'amount' => 'required|integer|min:1',
         ]);
 
-        $this->service->transfer(
-            Wallet::findOrFail($data['from_wallet_id']),
-            Wallet::findOrFail($data['to_wallet_id']),
-            $data['amount'],
-            $request->header('Idempotency-Key')
-        );
+        return rescue(
+            function () use ($data, $request) {
+                $this->service->transfer(
+                    Wallet::findOrFail($data['from_wallet_id']),
+                    Wallet::findOrFail($data['to_wallet_id']),
+                    $data['amount'],
+                    $request->header('Idempotency-Key')
+                );
 
-        return response()->json([
-            "message" => 'transfer has been completed successfully'
-        ]);
+                return response()->json([
+                    "message" => 'Transfer has been completed successfully'
+                ]);
+            },
+            function (Exception $exception) {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                ], Response::HTTP_CONFLICT);
+            }
+        );
     }
 }

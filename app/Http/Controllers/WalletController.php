@@ -7,9 +7,13 @@ use App\Http\Resources\TransactionResource;
 use App\Http\Resources\WalletResource;
 use App\Models\Wallet;
 use App\Services\WalletService;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
+use Throwable;
 
 class WalletController extends Controller
 {
@@ -30,7 +34,7 @@ class WalletController extends Controller
     public function index(Request $request): JsonResource
     {
         $wallets =  Wallet::query()
-            ->when($request->owner, fn($q) => $q->where('owner_name', $request->owner))
+            ->when($request->owner_name, fn($q) => $q->where('owner_name', $request->owner_name))
             ->when($request->currency, fn($q) => $q->where('currency', $request->currency))
             ->get();
 
@@ -73,16 +77,24 @@ class WalletController extends Controller
         return TransactionResource::make($transaction);
     }
 
-    public function withdraw(Request $request, Wallet $wallet): JsonResource
+    public function withdraw(Request $request, Wallet $wallet)
     {
         $request->validate(['amount' => 'required|integer|min:1']);
 
-        $transaction = $this->service->withdraw(
-            $wallet,
-            $request->integer('amount'),
-            $request->header('Idempotency-Key')
+        return rescue(
+            function () use ($wallet, $request) {
+                $transaction = $this->service->withdraw(
+                    $wallet,
+                    $request->integer('amount'),
+                    $request->header('Idempotency-Key')
+                );
+                return TransactionResource::make($transaction);
+            },
+            function (Exception $exception) {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                ], Response::HTTP_CONFLICT);
+            }
         );
-
-        return TransactionResource::make($transaction);
     }
 }
