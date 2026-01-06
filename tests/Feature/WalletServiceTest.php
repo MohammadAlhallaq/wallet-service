@@ -68,6 +68,7 @@ class WalletServiceTest extends TestCase
             ->assertJson(['balance' => 0]);
 
         $this->assertDatabaseHas('wallets', [
+            'id' => $wallet->id,
             'balance' => 0,
         ]);
     }
@@ -86,6 +87,7 @@ class WalletServiceTest extends TestCase
         $response->assertStatus(201);
 
         $this->assertDatabaseHas('wallets', [
+            'id' => $wallet->id,
             'balance' => 100 * 100,
         ]);
     }
@@ -107,6 +109,7 @@ class WalletServiceTest extends TestCase
         $response->assertStatus(201);
 
         $this->assertDatabaseHas('wallets', [
+            'id' => $wallet->id,
             'balance' => 0,
         ]);
     }
@@ -121,5 +124,75 @@ class WalletServiceTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonCount(3, 'data');
+    }
+
+
+    public function test_wallet_deposit()
+    {
+        $wallet = Wallet::factory()->create(['balance' => 100 * 100]);
+        $key = 'unique-key-123';
+
+        $response = $this->postJson("/api/wallets/{$wallet->id}/deposit", ['amount' => 50], [
+            'Idempotency-Key' => $key
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertDatabaseHas('wallets', [
+            'id' => $wallet->id,
+            'balance' => 150 * 100,
+        ]);
+
+        // Retry with same key
+        $response = $this->postJson("api/wallets/{$wallet->id}/deposit", ['amount' => 50], [
+            'Idempotency-Key' => $key
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertDatabaseHas('wallets', [
+            'id' => $wallet->id,
+            'balance' => 150 * 100,
+        ]);
+    }
+
+
+    public function test_wallet_withdraw_insufficient_funds()
+    {
+        $wallet = Wallet::factory()->create(['balance' => 50 * 100]);
+        $key = 'withdraw-key-123';
+
+        $response = $this->postJson("/api/wallets/{$wallet->id}/withdraw", ['amount' => 100], [
+            'Idempotency-Key' => $key
+        ]);
+
+        $response->assertStatus(409);
+    }
+
+    public function test_transfer_success()
+    {
+        $from = Wallet::factory()->create(['balance' => 100 * 100, 'currency' => 'USD']);
+        $to = Wallet::factory()->create(['balance' => 50 * 100, 'currency' => 'USD']);
+        $key = 'transfer-key-123';
+
+        $response = $this->postJson("/api/transfers", [
+            'from_wallet_id' => $from->id,
+            'to_wallet_id' => $to->id,
+            'amount' => 60
+        ], [
+            'Idempotency-Key' => $key
+        ]);
+
+        $response->assertOk();
+
+        // Check that the source wallet balance decreased
+        $this->assertDatabaseHas('wallets', [
+            'id' => $from->id,
+            'balance' => 40 * 100,
+        ]);
+
+        // Check that the destination wallet balance increased
+        $this->assertDatabaseHas('wallets', [
+            'id' => $to->id,
+            'balance' => 110 * 100,
+        ]);
     }
 }

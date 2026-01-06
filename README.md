@@ -73,6 +73,27 @@ php artisan serve
 
 6. Access the app at: [http://localhost:8000](http://localhost:8000)
 
+---
+
+## Running Tests
+
+Once your application is set up and the database is migrated, you can run all automated tests using:
+
+```bash
+php artisan test
+```
+
+Or with PHPUnit directly:
+
+```bash
+vendor/bin/phpunit
+```
+
+This will run all feature and unit tests, including wallet operations, deposits, withdrawals, and transfers.  
+Make sure your testing database is configured in `.env.testing` or in `phpunit.xml`.
+
+---
+
 ## API Endpoints
 
 ### Health
