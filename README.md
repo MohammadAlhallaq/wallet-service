@@ -25,7 +25,7 @@ cd <project-directory>
 
 * PHP 8.5
 * Composer
-* SQLite (will be used by defult in our example)
+* SQLite (will be used by defult in the service)
 
 ### Run with Docker
 
