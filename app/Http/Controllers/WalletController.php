@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TransactionCollection;
 use App\Http\Resources\TransactionResource;
 use App\Http\Resources\WalletResource;
 use App\Models\Wallet;
 use App\Services\WalletService;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Throwable;
@@ -58,6 +55,9 @@ class WalletController extends Controller
     {
         $transactions = $wallet->transactions()
             ->when($request->type, fn($q) => $q->where('type', $request->type))
+            ->when($request->start_date, fn($q) => $q->whereDate('created_at', '>=', $request->start_date))
+            ->when($request->end_date, fn($q) => $q->whereDate('created_at', '<=', $request->end_date))
+            ->with(['Wallet', 'relatedWallet'])
             ->orderBy('created_at')
             ->simplePaginate(20);
 

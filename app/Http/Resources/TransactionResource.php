@@ -15,6 +15,9 @@ class TransactionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->resource->id,
+            'wallet' => $this->resource->wallet,
+            'related_wallet' => $this->resource->relatedWallet,
             'type' => $this->resource->type,
             'amount' => $this->resource->amount,
             'created_at' => $this->resource->created_at->toDateTimeString(),

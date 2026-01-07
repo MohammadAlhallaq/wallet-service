@@ -62,7 +62,7 @@ class WalletService
     public function transfer(Wallet $fromWallet, Wallet $toWallet, int $amount, string $key)
     {
         return DB::transaction(function () use ($fromWallet, $toWallet, $amount, $key) {
-
+            
             $fromWallet->lockforupdate();
             $toWallet->lockforupdate();
 
