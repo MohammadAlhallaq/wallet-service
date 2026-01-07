@@ -16,7 +16,7 @@ class WalletServiceTest extends TestCase
     {
         $response = $this->getJson('/api/health');
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
             ->assertJson(['status' => 'ok']);
     }
 
@@ -29,7 +29,7 @@ class WalletServiceTest extends TestCase
 
         $response = $this->postJson('/api/wallets', $payload);
 
-        $response->assertStatus(201);
+        $response->assertSuccessful();
 
         $this->assertDatabaseHas('wallets', [
             'owner_name' => 'My Wallet',
@@ -44,7 +44,7 @@ class WalletServiceTest extends TestCase
 
         $response = $this->getJson('/api/wallets');
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
             ->assertJsonCount(2, 'data');
     }
 
@@ -55,7 +55,7 @@ class WalletServiceTest extends TestCase
 
         $response = $this->getJson("/api/wallets/{$wallet->id}");
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
             ->assertJsonFragment(['id' => $wallet->id]);
     }
 
@@ -65,7 +65,7 @@ class WalletServiceTest extends TestCase
 
         $response = $this->getJson("/api/wallets/{$wallet->id}/balance");
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
             ->assertJson(['balance' => 0]);
 
         $this->assertDatabaseHas('wallets', [
@@ -85,7 +85,7 @@ class WalletServiceTest extends TestCase
             'Idempotency-Key' => 'unique-key-123',
         ])->postJson("/api/wallets/{$wallet->id}/deposit", $payload);
 
-        $response->assertStatus(201);
+        $response->assertSuccessful();
 
         $this->assertDatabaseHas('wallets', [
             'id' => $wallet->id,
@@ -107,7 +107,7 @@ class WalletServiceTest extends TestCase
             'Idempotency-Key' => 'unique-key-123',
         ])->postJson("/api/wallets/{$wallet->id}/withdraw", $payload);
 
-        $response->assertStatus(201);
+        $response->assertSuccessful();
 
         $this->assertDatabaseHas('wallets', [
             'id' => $wallet->id,
@@ -123,7 +123,7 @@ class WalletServiceTest extends TestCase
 
         $response = $this->getJson("/api/wallets/{$wallet->id}/transactions");
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
             ->assertJsonCount(3, 'data');
     }
 
@@ -175,7 +175,7 @@ class WalletServiceTest extends TestCase
             'Idempotency-Key' => $key
         ]);
 
-        $response->assertStatus(409);
+        $response->assertStatus(Response::HTTP_CONFLICT);
     }
 
     public function test_transfer_success()
