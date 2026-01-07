@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,28 +31,22 @@ class Wallet extends Model
 
     public function deposit(float $amount): self
     {
-        $this->increment('balance', $this->toMinorUnits($amount));
+        $this->increment('balance', Money::fromFloat($amount)->amount());
 
         return $this;
     }
 
     public function withdraw(float $amount): self
     {
-        $amountInCents = $this->toMinorUnits($amount);
+        $amountInCents = Money::fromFloat($amount)->amount();
 
         $this->decrement('balance', $amountInCents);
 
         return $this;
     }
 
-
-    protected function toMinorUnits(float $amount): int
-    {
-        return (int) round($amount * 100);
-    }
-
     public function getBalanceAttribute($value): float
     {
-        return $value / 100;
+        return  Money::fromCents($value)->toFloat();
     }
 }

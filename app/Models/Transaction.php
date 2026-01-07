@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\TransactionType;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -37,8 +38,8 @@ class Transaction extends Model
     protected function amount(): Attribute
     {
         return Attribute::make(
-            get: fn($value, array $attributes) => (int) $attributes['amount'] / 100,
-            set: fn($value) => (int) $value * 100,
+            get: fn($value, array $attributes) => Money::fromCents($value)->toFloat(),
+            set: fn($value) => Money::fromFloat($value)->amount(),
         );
     }
 }

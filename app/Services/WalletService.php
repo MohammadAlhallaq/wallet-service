@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Wallet;
 use App\Models\Transaction;
-use App\Models\Transfer;
 use App\Enums\TransactionType;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 use LogicException;
 
@@ -22,7 +22,7 @@ class WalletService
 
             if ($existing) return $existing;
 
-            $wallet->increment('balance', $this->toCents($amount));
+            $wallet->increment('balance', Money::fromFloat($amount)->amount());
 
             return Transaction::create([
                 'wallet_id' => $wallet->id,
@@ -104,11 +104,5 @@ class WalletService
             $credit->save();
             return;
         });
-    }
-
-
-    protected function toCents(float $amount): int
-    {
-        return (int) round($amount * 100);
     }
 }
