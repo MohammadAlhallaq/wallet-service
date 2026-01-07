@@ -10,6 +10,9 @@ A simple Laravel-based wallet service API with basic wallet management, transact
 * Transfer funds between wallets (with idempotency support)
 * Health check endpoint
 
+## Postman collection
+You can also find a complete Postman API collection for this service in the **`postman/`** directory.
+
 ## Setup Instructions
 
 ### Clone the Repository
@@ -231,9 +234,6 @@ Cache::lock("wallet:$walletId", 10)->block(5, function () use ($walletId) {
 });
 ```
 
----
-### Postman collection
-You can also find a complete Postman API collection for this service in the **`postman/`** directory.
 ---
 
 > **Note:**  
