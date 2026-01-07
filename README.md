@@ -89,7 +89,7 @@ Or with PHPUnit directly:
 vendor/bin/phpunit
 ```
 
-This will run all feature and unit tests, including wallet operations, deposits, withdrawals, and transfers.  
+This will run all tests realted to wallet operations, deposits, withdrawals, and transfers.  
 Make sure your testing database is configured in `.env.testing` or in `phpunit.xml`.
 
 ---
