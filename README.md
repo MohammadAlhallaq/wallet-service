@@ -232,6 +232,9 @@ Cache::lock("wallet:$walletId", 10)->block(5, function () use ($walletId) {
 ```
 
 ---
+### Postman collection
+You can also find a complete Postman API collection for this service in the **`postman/`** directory.
+---
 
 > **Note:**  
 > In the current implementation of the service, we didn't use caching mechanisms for idempotency or locking to **avoid adding another layer of complexity** at this stage, as introducing caching would require dealing with additional challenges such as **cache invalidation**, **distributed consistency**.  

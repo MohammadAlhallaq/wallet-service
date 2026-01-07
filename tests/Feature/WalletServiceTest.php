@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\Response;
 use Tests\TestCase;
 
 class WalletServiceTest extends TestCase
@@ -50,7 +51,7 @@ class WalletServiceTest extends TestCase
 
     public function test_can_view_wallet()
     {
-        $wallet = \App\Models\Wallet::factory()->create();
+        $wallet = Wallet::factory()->create();
 
         $response = $this->getJson("/api/wallets/{$wallet->id}");
 
@@ -95,7 +96,7 @@ class WalletServiceTest extends TestCase
     public function test_can_withdraw_from_wallet_balance()
     {
         $wallet = Wallet::factory()->create([
-            'balance' => 100 * 100 // save as cents
+            'balance' => 100 * 100
         ]);
 
         $payload = [
@@ -126,6 +127,16 @@ class WalletServiceTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
+    public function test_deposit_requires_idempotency_key()
+    {
+        $wallet = Wallet::factory()->create();
+
+        $response = $this->postJson("/api/wallets/{$wallet->id}/deposit", [
+            'amount' => 100,
+        ]);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
 
     public function test_wallet_deposit()
     {
